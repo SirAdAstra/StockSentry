@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: stocksentry-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: stocksentry
+      POSTGRES_USER: stocksentry
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stocksentry -d stocksentry"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [stocksentry-net]
+
+  kafka:
+    image: apache/kafka:4.3.1
+    container_name: stocksentry-kafka
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,DOCKER://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,DOCKER://kafka:9094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks: [stocksentry-net]
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: stocksentry-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks: [stocksentry-net]
+
+  kafka-ui:
+    image: kafbat/kafka-ui:latest
+    container_name: stocksentry-kafka-ui
+    restart: unless-stopped
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: stocksentry-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9094
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+    networks: [stocksentry-net]
+
+networks:
+  stocksentry-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  kafka-data:
+  pgadmin-data:
