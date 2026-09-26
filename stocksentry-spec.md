@@ -4,7 +4,7 @@
 
 ## 1. Стек
 
-- **.NET 8**, ASP.NET Core Web API
+- **.NET 10**, ASP.NET Core Web API
 - **EF Core** + PostgreSQL
 - **Kafka** (producer + consumer, отдельный consumer-проект)
 - **JWT** авторизация с ролями (Admin / Manager / Viewer)
@@ -18,14 +18,14 @@
 ```
 StockSentry/
 ├── src/
-│   ├── StockSentry.Api/            # контроллеры, middleware, Program.cs
-│   ├── StockSentry.Application/    # DTO, интерфейсы сервисов, валидация
-│   ├── StockSentry.Domain/         # сущности, enum'ы, бизнес-правила
-│   ├── StockSentry.Infrastructure/ # DbContext, репозитории, Kafka producer
-│   └── StockSentry.AlertWorker/    # отдельный консольный воркер — Kafka consumer
+│   ├── Api/            # контроллеры, middleware, Program.cs
+│   ├── Application/    # DTO, интерфейсы сервисов, валидация
+│   ├── Domain/         # сущности, enum'ы, бизнес-правила
+│   ├── Infrastructure/ # DbContext, репозитории, Kafka producer
+│   └── AlertWorker/    # отдельный консольный воркер — Kafka consumer
 ├── tests/
-│   ├── StockSentry.UnitTests/
-│   └── StockSentry.IntegrationTests/
+│   ├── UnitTests/
+│   └── IntegrationTests/
 ├── docker-compose.yml
 └── README.md
 ```
@@ -91,8 +91,8 @@ StockSentry/
 
 ### Этап 0 — Настройка проекта (3–5 ч)
 - [x] Создать solution и структуру проектов из раздела 2
-- [ ] `docker-compose.yml` со скелетом: PostgreSQL + Kafka (KRaft-режим, без Zookeeper — проще поднять)
-- [ ] Пустой `Program.cs` в Api, подключение к БД, `dotnet ef` установлен, первая миграция (пустая) проходит
+- [x] `docker-compose.yml` со скелетом: PostgreSQL + Kafka (KRaft-режим, без Zookeeper — проще поднять)
+- [x] Пустой `Program.cs` в Api, подключение к БД, `dotnet ef` установлен, первая миграция (пустая) проходит
 
 ### Этап 1 — Домен и БД (6–10 ч)
 - [ ] Сущности из раздела 3 в `Domain`
